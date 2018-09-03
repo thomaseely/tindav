@@ -21,6 +21,7 @@
 								AND password = '".base64_encode(trim($password))."' 
 								
 								AND status = 0 LIMIT 1";
+								
 					
 		$result = mysqli_query($connection,$query) or die("Error:".mysqli_error($connection));			
 		
@@ -31,20 +32,22 @@
 			//$_SESSION['token'] = $token;
 			$row = mysqli_fetch_assoc($result);
 			
-					   
-			$response = array(
-				'status' => "success",
-				$col => $row[$col],
-				'token' => $row['token']				
-			);
+			if($row !=''){	   
+				$response = array(
+					'status' => "success",
+					$col => $row[$col],
+					'token' => $row['token']				
+				);
+			}
+			else
+			{
+				$response = array(
+					'status' => "failure",
+					'status_message' =>"Invalid username or password"
+				);
+			}
 		}
-		else
-		{
-			$response = array(
-				'status' => "failure",
-				'status_message' =>"Record not found."
-			);
-		}		
+			
 	}
 	else
 	{
