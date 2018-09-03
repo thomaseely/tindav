@@ -59,7 +59,7 @@
 				}
 				if(isset($data["last_name"]) && $data["last_name"]!='') {
 					$query .= " last_name='".$data["last_name"]."',"; 
-				 }			
+				}			
 				if(isset($data["phone"]) && $data["phone"]!='') {
 					$query .= " phone='".$data["phone"]."',";			
 				}
