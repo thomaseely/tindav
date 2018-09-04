@@ -25,7 +25,7 @@
 	$data = json_decode(file_get_contents('php://input'), true);
 
 	//CHECK PARAMS
-	if($data["first_name"] !='' && $data["last_name"] !='' && $data["username"] !='' && $data["password"] !='' && $data["phone"] !='' && $data["user_type"] !='') 
+	if($data["first_name"] !='' && $data["last_name"] !='' && $data["username"] !='' && $data["password"] !='' && $data["phone"] !='' && $data["address"] !='' && $data["user_type"] !='') 
 	{		
 		$checkUserName = isUsernameExists($data["username"],$data["user_type"]); //check username is exists
 		
@@ -54,28 +54,31 @@
 			{				
 				$lastinsertid = mysqli_insert_id($connection);
 				
-				//add address info table
-				$query = "INSERT INTO address_info SET ";
-				if($data["user_type"] === 'sitter') {	
-					$query .=" sitter_id='".$lastinsertid."',";
-				}
-				if($data["user_type"] === 'parent') {	
-					$query .=" parent_id='".$lastinsertid."',";
-				}
-				
-				$query .=" address='".$data["address"]."', city='".
-							$data["city"]."', state='".$data["state"]."', country='".
-							$data["country"]."', zipcode='".$data["zipcode"]."', created_on=now(), status=0";
-				if(mysqli_query($connection, $query) or die("Error:".mysqli_error($connection)))
-				{
-					//success response					
-					$response = array(
-						'status' => "success",
-						'token' => $token,
-						$data['user_type'] => $lastinsertid,
-						'status_message' =>$data['user_type']." Registration successfull."
-					);	
-				}	
+				if($data['address'] !='') {
+					//add address info table
+					$query = "INSERT INTO address_info SET ";
+					if($data["user_type"] === 'sitter') {	
+						$query .=" sitter_id='".$lastinsertid."',";
+					}
+					if($data["user_type"] === 'parent') {	
+						$query .=" parent_id='".$lastinsertid."',";
+					}
+					
+					$query .=" address='".$data["address"]."', city='".
+								$data["city"]."', state='".$data["state"]."', country='".
+								$data["country"]."', zipcode='".$data["zipcode"]."', created_on=now(), status=0";
+								
+					if(mysqli_query($connection, $query) or die("Error:".mysqli_error($connection)))
+					{
+						//success response					
+						$response = array(
+							'status' => "success",
+							'token' => $token,
+							$data['user_type'] => $lastinsertid,
+							'status_message' => $data['user_type']." Registration successfull."
+						);	
+					}
+				}				
 			}
 			
 			//failure response
@@ -83,7 +86,7 @@
 			{
 				$response = array(
 					'status' => "failure",
-					'status_message' =>$data['user_type']." Registration Failed."
+					'status_message' => $data['user_type']." Registration Failed."
 				);
 			}				
 		}
@@ -99,7 +102,7 @@
 	{
 		$response = array(
 			'status' => "failure",
-			'status_message' =>"Missing Fileds Username or Password"
+			'status_message' =>"Missing any Fileds first_name, last_name, username, password, phone or address and user_type"
 		);
 	}	
 		

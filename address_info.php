@@ -4,13 +4,13 @@
 	API name:Address info
 	Filename: address_info.php
 	//provider mandatory parameters
-	Params: parent_id or sitter_id, address information
+	Params: parent_id or sitter_id, user_type and address information
 	
 	API vertion: 1.0
 	Created By: Thomas
 	Created On: 28-08-2018
 	Modified On: 29-08-2018
-	Description: This API is used to add card informations .
+	Description: This API is used to add address informations .
 	*/
 	
 	session_start();	
@@ -106,7 +106,7 @@
 	{
 		$response = array(
 			'status' => "failure",
-			'status_message' =>"Missing Fileds pass address_add/edit/delete accordingly "
+			'status_message' =>"Missing Fileds with address_add or address_edit or address_delete accordingly "
 		);
 	}	
 		

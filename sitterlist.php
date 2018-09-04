@@ -21,9 +21,9 @@
 	{			
 		if( isValidToken($token,$user_type)!== false ) 
 		{
-			$query = "SELECT s.sitter_id, s.first_name, s.last_name, s.description, s.photo, s.ages_handling, 
-			s.service_start_date, s.service_end_date,s.service_timeslot 
-			FROM sitters s LEFT JOIN address_info a ON s.sitter_id = a.sitter_id ";
+			$query = "SELECT s.sitter_id, s.first_name, s.last_name, s.description, s.photo, s.ages_handling, s.service_start_date, s.service_end_date,s.service_timeslot 
+					  FROM sitters s LEFT JOIN address_info a 
+					  ON s.sitter_id = a.sitter_id ";
 			if($zipcode != ''){
 				$query.= " AND a.zipcode = '".$zipcode."' ";
 			}
