@@ -4,45 +4,32 @@
 	function isUsernameExists($username, $user_type){
 		global $connection;
 		
-		if($user_type == "parent") {
-			//Check in parents table
-			$query = "SELECT parent_id FROM parents WHERE username='".$username."' LIMIT 1";						
+		$tbl = ($user_type === "sitter")? "sitters":"parents";
+		$col = ($user_type === "parent")? "parent_id":"sitter_id";	
+			
+		if($username != "") {
+			$query = "SELECT $col FROM $tbl WHERE username='".$username."' LIMIT 1";						
 			$result = mysqli_query($connection,$query) or die("Error:".mysqli_error($connection));			
 			// Associative array
 			$row = mysqli_fetch_assoc($result);
-			if($row['parent_id']!='') return true;
-			return false;	
+			if($row["$col"]!='') return true;			
 		}
-	
-		if($user_type == "sitter") {
-			//Check in sitters table
-			$query = "SELECT sitter_id FROM sitters WHERE username='".$username."' LIMIT 1";						
-			$result = mysqli_query($connection,$query) or die("Error:".mysqli_error($connection));			
-			// Associative array
-			$row = mysqli_fetch_assoc($result);
-			if($row['sitter_id']!='') return true;		
-			return false;		
-		}
+		return false;	
 	}
 	
 	function isValidToken($token, $user_type){
 		global $connection;
-		if($user_type == "parent") {
-			$query = "SELECT * FROM parents WHERE token='".$token."' LIMIT 1";						
-			$result = mysqli_query($connection,$query) or die("Error:".mysqli_error($connection));			
-			// Associative array
-			$row = mysqli_fetch_assoc($result);
-			if($row['parent_id']!='') return $row;
-		}
 		
-		if($user_type == "sitter") {
-			$query = "SELECT * FROM sitters WHERE token='".$token."' LIMIT 1";						
+		if($token !='') {
+			$tbl = ($user_type === "sitter")? "sitters":"parents";
+			$col = ($user_type === "parent")? "parent_id":"sitter_id";	
+			
+			$query = "SELECT * FROM $tbl WHERE token='".$token."' LIMIT 1";						
 			$result = mysqli_query($connection,$query) or die("Error:".mysqli_error($connection));			
 			// Associative array
 			$row = mysqli_fetch_assoc($result);
-			if($row['sitter_id']!='') return $row;
+			if($row["$col"]!='') return $row;
 		}
-
 		return false;
 	}
 	
@@ -77,6 +64,16 @@
 			return mysqli_real_escape_string(trim($input));
 		}
 		return false;
+	}
+	
+	function isValidSession() {
+		$now = time();
+		if ($now > $_SESSION['expire']) {
+			session_destroy();
+			echo "Your session has expired!";
+			exit;
+		}
+		return true;
 	}
 	
 ?>

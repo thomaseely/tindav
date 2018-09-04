@@ -1,7 +1,14 @@
 <?php
-	//session_start();
+	session_start();	
+	if (!isset($_SESSION['token'])) {
+        echo "Please Login again";
+		exit;
+    }
 	require("../connection.php");
-	require("functions.php");
+	require("functions.php");	
+	
+	$isValidSession = isValidSession();	
+	if(!$isValidSession) exit;
 	
 	if(isset($_GET)) extract($_GET);
 	

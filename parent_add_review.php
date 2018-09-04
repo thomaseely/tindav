@@ -1,5 +1,5 @@
 <?php
-	/**
+	/**	
 	Client: Tindav.com
 	API name: Parent Add Review about Sitter
 	Filename: parent_add_review.php
@@ -14,8 +14,17 @@
 	Description: This API is used to add review to the sitter by the parent .
 	*/
 	
+	session_start();	
+	if (!isset($_SESSION['token'])) {
+        echo "Please Login again";
+		exit;
+    }
 	require("../connection.php");
-	require("functions.php");
+	require("functions.php");	
+	
+	$isValidSession = isValidSession();	
+	if(!$isValidSession) exit;
+	
 	
 	//DB CONNECTION
 	$db = new dbObj();

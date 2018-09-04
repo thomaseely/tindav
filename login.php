@@ -18,21 +18,22 @@
 		
 	    $query = "SELECT $col, token FROM $tbl 
 								WHERE username = '".trim($username)."' 
-								AND password = '".base64_encode(trim($password))."' 
-								
-								AND status = 0 LIMIT 1";
-								
-					
+								AND password = '".base64_encode(trim($password))."' 								
+								AND status = 0 LIMIT 1";				
 		$result = mysqli_query($connection,$query) or die("Error:".mysqli_error($connection));			
 		
-		if($result)
-		{
-			//$token = md5($_GET["username"].$_GET["password"]);	
-			//session_start();
-			//$_SESSION['token'] = $token;
+		if($result !='')
+		{		
 			$row = mysqli_fetch_assoc($result);
 			
-			if($row !=''){	   
+			if($row !=''){	 
+				session_start();
+				$_SESSION['start'] = time(); // Taking now logged in time.
+				// Ending a session in 30 minutes from the starting time.
+				
+				$_SESSION['token'] = $row['token'];
+				$_SESSION['expire'] = $_SESSION['start'] + (2 * 60); //30*60 for half an hour
+			
 				$response = array(
 					'status' => "success",
 					$col => $row[$col],

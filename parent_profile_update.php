@@ -14,8 +14,16 @@
 	Description: This API is used to register the user like Provider or Seeker with children information .
 	*/
 	
+	session_start();	
+	if (!isset($_SESSION['token'])) {
+        echo "Please Login again";
+		exit;
+    }
 	require("../connection.php");
-	require("functions.php");
+	require("functions.php");	
+	
+	$isValidSession = isValidSession();	
+	if(!$isValidSession) exit;
 	
 	//DB CONNECTION
 	$db = new dbObj();
