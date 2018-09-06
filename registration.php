@@ -1,17 +1,16 @@
 <?php
 	/**
 	Client: Tindav.com
-	API name: Registration
+	API name: Registration, Post request
 	Filename: registration.php
 	//provider mandatory parameters
-	Params: username, password, first_name, photo, address1, city, state, country, phone1, mobile1, zipcode, weekdays, service_weekends,
-			service_type, service_timeslot
+	Params: username, password, first_name, last_name, phone, address1, city, state, country, zipcode
 	
 	API vertion: 1.0
 	Created By: Thomas
 	Created On: 08-08-2018
 	Modified On: 13-08-2018
-	Description: This API is used to register the user like Provider or Seeker with children information .
+	Description: This API is used to register the user like Sitter or Parent .
 	*/
 	
 	require("../connection.php");
@@ -30,25 +29,15 @@
 		$checkUserName = isUsernameExists($data["username"],$data["user_type"]); //check username is exists
 		
 		if($checkUserName === false) {
+					
+			$password = base64_encode(sanitize($data["password"]));
 			
-			$token = md5(sha1($data["username"].$data["password"]));	//generate token				
-			$password = base64_encode($data["password"]);
+			$tbl = ($data["user_type"] === "sitter")? "sitters":"parents";
 			
-			if($data["user_type"] === 'parent') {	 //if parent insert into parents detail table		
-				
-				$query = "INSERT INTO parents SET first_name='".
-							$data["first_name"]."', last_name='".$data["last_name"]."', username='".
-							$data["username"]."', password='".$password."', token='".$token."', phone='".
-							$data["phone"]."', created_on=now(),status=0";
-			}	
-
-			if($data["user_type"] === 'sitter') {	 //if sitter insert into sitters table		
-				
-				$query = "INSERT INTO sitters SET username='".$data["username"]."', password='".
-							$password."',token='".$token."', first_name='".
-							$data["first_name"]."', last_name='".$data["last_name"]."', phone='".
-							$data["phone"]."', created_on=now(), status=0";
-			}			
+			$query = "INSERT INTO $tbl SET first_name='".
+						sanitize($data["first_name"])."', last_name='".sanitize($data["last_name"])."', username='".
+						sanitize($data["username"])."', password='".$password."', phone='".
+						sanitize($data["phone"])."', created_on=now(), status=0";			
 
 			if(mysqli_query($connection, $query) or die("Error:".mysqli_error($connection)))
 			{				
@@ -57,6 +46,7 @@
 				if($data['address'] !='') {
 					//add address info table
 					$query = "INSERT INTO address_info SET ";
+					
 					if($data["user_type"] === 'sitter') {	
 						$query .=" sitter_id='".$lastinsertid."',";
 					}
@@ -64,16 +54,15 @@
 						$query .=" parent_id='".$lastinsertid."',";
 					}
 					
-					$query .=" address='".$data["address"]."', city='".
-								$data["city"]."', state='".$data["state"]."', country='".
-								$data["country"]."', zipcode='".$data["zipcode"]."', created_on=now(), status=0";
+					$query .=" address='".sanitize($data["address"])."', city='".
+								sanitize($data["city"])."', state='".sanitize($data["state"])."', country='".
+								sanitize($data["country"])."', zipcode='".sanitize($data["zipcode"])."', created_on=now(), status=0";
 								
 					if(mysqli_query($connection, $query) or die("Error:".mysqli_error($connection)))
 					{
 						//success response					
 						$response = array(
 							'status' => "success",
-							'token' => $token,
 							$data['user_type'] => $lastinsertid,
 							'status_message' => $data['user_type']." Registration successfull."
 						);	

@@ -33,7 +33,7 @@
 	$data = json_decode(file_get_contents('php://input'), true);
 	
 	//CHECK PARAMS
-	if($data["token"] !='')
+	if($data["token"] !='' && $data["user_type"]!='')
 	{		
 		$row = isValidToken($data["token"], $data["user_type"]);
 			
@@ -42,39 +42,39 @@
 				$query = "UPDATE parents SET ";
 				
 				if($data["service_type"] !=''){
-					$query .= " service_type='".$data["service_type"]."',";
+					$query .= " service_type='".sanitize($data["service_type"])."',";
 				}
 				if($data["start_date"] !=''){
-					$query .= " start_date='".$data["start_date"]."',";
+					$query .= " start_date='".sanitize($data["start_date"])."',";
 				}
 				if($data["start_time"] !=''){
-					$query .= " start_time='".$data["start_time"]."',";
+					$query .= " start_time='".sanitize($data["start_time"])."',";
 				}
 				if($data["end_date"] !=''){
-					$query .= " end_date='".$data["end_date"]."',";
+					$query .= " end_date='".sanitize($data["end_date"])."',";
 				}
 				if($data["end_time"] !=''){
-					$query .= " end_time='".$data["end_time"]."',";
+					$query .= " end_time='".sanitize($data["end_time"])."',";
 				}
 				if($data["no_of_child_tocare"] !=''){
-					$query .= " no_of_child_tocare='".$data["no_of_child_tocare"]."',";
+					$query .= " no_of_child_tocare='".sanitize($data["no_of_child_tocare"])."',";
 				}
 				if(isset($data["photo"]) && $data["photo"]!='')	{
-					$query .= " photo='".$data["photo"]."',";
+					$query .= " photo='".sanitize($data["photo"])."',";
 				} 
 				if(isset($data["first_name"]) && $data["first_name"]!='') {
-					$query .= " first_name='".$data["first_name"]."',"; 
+					$query .= " first_name='".sanitize($data["first_name"])."',"; 
 				}
 				if(isset($data["last_name"]) && $data["last_name"]!='') {
-					$query .= " last_name='".$data["last_name"]."',"; 
+					$query .= " last_name='".sanitize($data["last_name"])."',"; 
 				}			
 				if(isset($data["phone"]) && $data["phone"]!='') {
-					$query .= " phone='".$data["phone"]."',";			
+					$query .= " phone='".sanitize($data["phone"])."',";			
 				}
 				
 				$query = substr($query, 0, -1);
 				
-				$query .= " WHERE parent_id='".$row['parent_id']."'";				
+				$query .= " WHERE parent_id='".sanitize($row['parent_id'])."'";				
 			}
 
 			if(mysqli_query($connection, $query) or die("Error:".mysqli_error($connection)))
@@ -84,17 +84,17 @@
 					$isThereChildOfParent = isThereChildOfParent($row["parent_id");
 					
 					if($isThereChildOfParent === true) {
-						$query = "DELETE FROM child_info WHERE parent_id = '".$row['parent_id']."' ";
+						$query = "DELETE FROM child_info WHERE parent_id = '".sanitize($row['parent_id'])."' ";
 						mysqli_query($connection, $query) or die("Error:".mysqli_error($connection));
 					}
 					
 					for($i = 0; $i < $data['no_of_child_tocare']; $i++){ // get the number of children of seeker					
 													
-						$query = "INSERT INTO child_info SET parent_id = '".$row['parent_id']."', child_first_name = '".
-									$data['children'][$i]["child_first_name"]."', child_last_name = '".
-									$data['children'][$i]["child_last_name"]."', child_gender = '".
-									$data['children'][$i]["child_gender"]."', child_age = '".
-									$data['children'][$i]["child_age"]."' created_on = now()";	
+						$query = "INSERT INTO child_info SET parent_id = '".sanitize($row['parent_id'])."', child_first_name = '".
+									sanitize($data['children'][$i]["child_first_name"])."', child_last_name = '".
+									sanitize($data['children'][$i]["child_last_name"])."', child_gender = '".
+									sanitize($data['children'][$i]["child_gender"])."', child_age = '".
+									sanitize($data['children'][$i]["child_age"])."' created_on = now()";	
 									
 						//insert childrens information into child info table 			
 						if(mysqli_query($connection, $query) or die("Error:".mysqli_error($connection)))
@@ -136,7 +136,7 @@
 	{
 		$response = array(
 			'status' => "failure",
-			'status_message' => "Token is null."
+			'status_message' => "Missing fields token and user_type."
 		);
 	}	
 		

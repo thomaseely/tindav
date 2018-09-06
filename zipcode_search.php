@@ -1,16 +1,16 @@
 <?php
 	/**
 	Client: Tindav.com
-	API name: Parent cancel Sitter
-	Filename: parent_cancel_sitter.php
+	API name: zipcode search before login
+	Filename: zipcode_search.php
 	//provider mandatory parameters
-	Params: parent_id, sitter_id, cancel_review
+	Params: zipcode
 	//seeker mandatory parameters
 	
 	API vertion: 1.0
 	Created By: Thomas
-	Created On: 28-08-2018
-	Modified On: 29-08-2018
+	Created On: 27-08-2018
+	Modified On: 02-09-2018
 	Description: This API is used to cancel sitter by the parent .
 	*/
 	

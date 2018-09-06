@@ -35,7 +35,7 @@
 	//CHECK PARAMS
 	if($data["parent_id"] !='' && $data["sitter_id"] !='' && $data["cancel_review"] !='' && $data["parent_sitter_id"]!='') 
 	{			
-		$query = "UPDATE parents_sitters SET status = 1 WHERE parent_sitter_id='".$data["parent_sitter_id"]."'";
+		$query = "UPDATE parents_sitters SET status = 1 WHERE parent_sitter_id='".sanitize($data["parent_sitter_id"])."'";
 			
 		if(mysqli_query($connection, $query) or die("Error:".mysqli_error($connection)))
 		{				
@@ -54,8 +54,8 @@
 		}			
 			
 		if($data['cancel_reviews'] !="") {
-			$query = "UPDATE parents_reviews SET cancel_reviews='".$data["cancel_reviews"]."', status = 1 
-						WHERE parent_id='".$data["parent_id"]."' and sitter_id='".$data["sitter_id"]."'";
+			$query = "UPDATE parents_reviews SET cancel_reviews='".sanitize($data["cancel_reviews"])."', status = 1 
+						WHERE parent_id='".sanitize($data["parent_id"])."' AND sitter_id='".sanitize($data["sitter_id"])."'";
 						
 			if(mysqli_query($connection, $query) or die("Error:".mysqli_error($connection)))
 			{				

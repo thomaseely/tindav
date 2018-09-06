@@ -4,7 +4,7 @@
 	API name:Card info
 	Filename: card_info.php
 	
-	Params: parent_id or sitter_id, cardinfo
+	Params: parent_id or sitter_id, cardinfo, card_add or card_id, card_edit/card_delete 
 	
 	API vertion: 1.0
 	Created By: Thomas
@@ -45,9 +45,9 @@
 			$query .= " sitter_id='".$data["sitter_id"]."',";
 		}
 		
-		$query .= " card_type='".$data["card_type"]."', name_on_card='".
-					$data["name_on_card"]."', card_number='".$data["card_number"]."', expiry='".
-					$data["expiry"]."', cvv='".$data["cvv"]."', created_on=now(), status = 0";
+		$query .= " card_type='".sanitize($data["card_type"])."', name_on_card='".
+					sanitize($data["name_on_card"])."', card_number='".sanitize($data["card_number"])."', expiry='".
+					sanitize($data["expiry"])."', cvv='".sanitize($data["cvv"])."', created_on=now(), status = 0";
 					
 		if(mysqli_query($connection, $query) or die("Error:".mysqli_error($connection)))
 		{				
@@ -73,7 +73,7 @@
 
 		//TO cancel the CARD
 		if($data['card_delete'] !="") {
-			$query = "DELETE FROM card_info WHERE card_id='".$data["card_id"]."'";
+			$query = "DELETE FROM card_info WHERE card_id='".sanitize($data["card_id"])."'";
 			
 			if(mysqli_query($connection, $query) or die("Error:".mysqli_error($connection))){
 				$response = array(
@@ -83,9 +83,9 @@
 			}
 		}	
 		else if($data['card_edit'] !="") {
-			$query = "UPDATE card_info SET card_type='".$data["card_type"]."', name_on_card='".
-						$data["name_on_card"]."', card_number='".$data["card_number"]."', expiry='".
-					    $data["expiry"]."', cvv='".$data["cvv"]."' WHERE card_id='".$data["card_id"]."'";
+			$query = "UPDATE card_info SET card_type='".sanitize($data["card_type"])."', name_on_card='".
+						sanitize($data["name_on_card"])."', card_number='".sanitize($data["card_number"])."', expiry='".
+					    sanitize($data["expiry"])."', cvv='".sanitize($data["cvv"])."' WHERE card_id='".sanitize($data["card_id"])."'";
 			
 			if(mysqli_query($connection, $query) or die("Error:".mysqli_error($connection))){
 				$response = array(

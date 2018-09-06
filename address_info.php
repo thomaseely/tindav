@@ -44,9 +44,9 @@
 			$query .=" sitter_id='".$data["sitter_id"]."'";
 		}
 		
-		$query .= ", address='".$data["address"]."', city='".
-					$data["city"]."', state='".$data["state"]."', country='".
-					$data["country"]."', zipcode='".$data["zipcode"]."', created_on=now(), status = 0";
+		$query .= ", address='".sanitize($data["address"])."', city='".
+					sanitize($data["city"])."', state='".sanitize($data["state"])."', country='".
+					sanitize($data["country"])."', zipcode='".sanitize($data["zipcode"])."', created_on=now(), status = 0";
 					
 		if(mysqli_query($connection, $query) or die("Error:".mysqli_error($connection)))
 		{				
@@ -65,7 +65,7 @@
 		{
 			$response = array(
 				'status' => "failure",
-				'status_message' =>" Address adding Failed."
+				'status_message' =>"Adding Address Failed."
 			);
 		}	
 	}
@@ -73,7 +73,7 @@
 
 		//TO cancel the reviews make status to 1
 		if($data['address_delete'] !="") {
-			$query = "DELETE FROM address_info WHERE address_id='".$data["address_id"]."'";			
+			$query = "DELETE FROM address_info WHERE address_id='".sanitize($data["address_id"])."'";			
 			
 			if(mysqli_query($connection, $query) or die("Error:".mysqli_error($connection))){
 				$response = array(
@@ -83,14 +83,14 @@
 			}
 		}	
 		else if($data['address_edit'] !="") {
-			$query = "UPDATE address_info SET address='".$data["address"]."', city='".
-						$data["city"]."', state='".$data["state"]."', country='".
-					    $data["country"]."', zipcode='".$data["zipcode"]."' 
-						WHERE address_id='".$data["address_id"]."'";			
+			$query = "UPDATE address_info SET address='".sanitize($data["address"])."', city='".
+						sanitize($data["city"])."', state='".sanitize($data["state"])."', country='".
+					    sanitize($data["country"])."', zipcode='".sanitize($data["zipcode"])."' 
+						WHERE address_id='".sanitize($data["address_id"])."'";			
 			
 		}
 		else {//make address to current address , so set status=1 for current, 0 old address
-			$query = "UPDATE address_info SET status='1' WHERE address_id='".$data["address_id"]."'";
+			$query = "UPDATE address_info SET status='1' WHERE address_id='".sanitize($data["address_id"])."'";
 			
 			if(mysqli_query($connection, $query) or die("Error:".mysqli_error($connection))){
 				$response = array(

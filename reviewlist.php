@@ -17,9 +17,9 @@
 	
 	$data = json_decode(file_get_contents('php://input'), true);	
 	
-	if(isset($token) && !empty($token)) 
+	if(isset($token) && !empty($token) && !empty($user_type)) 
 	{			
-		$row = isValidToken($token,$user_type);
+		$row = isValidToken($token, $user_type);
 		
 		if(!empty($row)) {
 			
@@ -65,7 +65,7 @@
 	{		
 		$response = array(
 			'status' => "failure",
-			'status_message' => "Missing parameter token."
+			'status_message' => "Missing parameter token or user_type."
 		);
 	}
 	

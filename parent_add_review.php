@@ -36,9 +36,9 @@
 	//CHECK PARAMS
 	if($data["parent_id"] !='' && $data["sitter_id"] !='' && $data["rating"] !='' && $data["reviews"] !='' ) 
 	{			
-		$query = "INSERT INTO parents_reviews SET parent_id='".$data["parent_id"]."', sitter_id='".
-					$data["sitter_id"]."', rating='".$data["rating"]."', reviews='".
-					$data["reviews"]."', created_on=now(), status = 0";
+		$query = "INSERT INTO parents_reviews SET parent_id='".sanitize($data["parent_id"])."', sitter_id='".
+					sanitize($data["sitter_id"])."', rating='".sanitize($data["rating"])."', reviews='".
+					sanitize($data["reviews"])."', created_on=now(), status = 0";
 		
 		if(mysqli_query($connection, $query) or die("Error:".mysqli_error($connection)))
 		{				
@@ -64,8 +64,8 @@
 	else if($data['parent_review_id']!="" ){		
 		
 		//update the rating and reviews
-		$query = "UPDATE parents_reviews SET rating='".$data["rating"]."', reviews='".
-					$data["reviews"]."' WHERE parent_review_id='".$data["parent_review_id"]."'";
+		$query = "UPDATE parents_reviews SET rating='".sanitize($data["rating"])."', reviews='".
+					sanitize($data["reviews"])."' WHERE parent_review_id='".sanitize($data["parent_review_id"])."'";
 		
 		if(mysqli_query($connection, $query) or die("Error:".mysqli_error($connection))){
 			$response = array(

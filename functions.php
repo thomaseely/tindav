@@ -1,4 +1,15 @@
 <?php	
+	//update new token after login
+	function updateToken($token, $tbl, $col, $id) {
+		global $connection;
+		
+		$query = "UPDATE $tbl SET token ='".$token."' WHERE $col ='".$id."' ";
+		
+		if(mysqli_query($connection, $query) or die("Error:".mysqli_error($connection))) {
+			return true;
+		}
+		return false;
+	}
 
 	//check username exists
 	function isUsernameExists($username, $user_type){
@@ -8,7 +19,7 @@
 		$col = ($user_type === "parent")? "parent_id":"sitter_id";	
 			
 		if($username != "") {
-			$query = "SELECT $col FROM $tbl WHERE username='".$username."' LIMIT 1";						
+			$query = "SELECT $col FROM $tbl WHERE username='".sanitize($username)."' LIMIT 1";						
 			$result = mysqli_query($connection,$query) or die("Error:".mysqli_error($connection));			
 			// Associative array
 			$row = mysqli_fetch_assoc($result);
@@ -24,7 +35,7 @@
 			$tbl = ($user_type === "sitter")? "sitters":"parents";
 			$col = ($user_type === "parent")? "parent_id":"sitter_id";	
 			
-			$query = "SELECT * FROM $tbl WHERE token='".$token."' LIMIT 1";						
+			$query = "SELECT * FROM $tbl WHERE token='".sanitize($token)."' LIMIT 1";						
 			$result = mysqli_query($connection,$query) or die("Error:".mysqli_error($connection));			
 			// Associative array
 			$row = mysqli_fetch_assoc($result);
@@ -60,8 +71,10 @@
 	}
 	
 	function sanitize($input){
+		global $connection;
+		
 		if($input !=""){
-			return mysqli_real_escape_string(trim($input));
+			return $connection->real_escape_string(trim($input));
 		}
 		return false;
 	}

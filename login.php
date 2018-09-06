@@ -1,4 +1,19 @@
 <?php
+	/**
+	Client: Tindav.com
+	API name: Login, GET Request
+	Filename: login.php
+	
+	Params: username, password, user_type
+	Description: Successful logged in users will get token for the next and further request.
+	
+	API vertion: 1.0
+	Created By: Thomas
+	Created On: 08-08-2018
+	Modified On: 06-09-2018
+	Description: This API is used to login the user to Tindav .
+	*/
+	
 	require("../connection.php");
 	require("functions.php");
 	
@@ -18,10 +33,9 @@
 		
 		$token = md5(sha1($username.$password));	//generate token	
 		
-	    $query = "SELECT $col, token FROM $tbl 
-								WHERE username = '".trim($username)."' 
-								AND password = '".base64_encode(trim($password))."' 
-								AND token = '".$token."'   	
+	    $query = "SELECT $col FROM $tbl 
+								WHERE username = '".sanitize($username)."' 
+								AND password = '".base64_encode(sanitize($password))."'
 								AND status = 0 LIMIT 1";
 								
 		$result = mysqli_query($connection,$query) or die("Error:".mysqli_error($connection));			
@@ -30,19 +44,25 @@
 		{		
 			$row = mysqli_fetch_assoc($result);
 			
-			if(!empty($row)){	 
-				session_start();
-				$_SESSION['start'] = time(); // Taking now logged in time.
-				// Ending a session in 30 minutes from the starting time.
+			if(!empty($row)){	
+				//generate new token
+				$token = md5(uniqid(rand(), true));
+				$updateToken = updateToken($token, $tbl, $col, $row[$col]);
 				
-				$_SESSION['token'] = $row['token'];
-				$_SESSION['expire'] = $_SESSION['start'] + (30 * 60); //30*60 for half an hour
-			
-				$response = array(
-					'status' => "success",
-					$col => $row[$col],
-					'token' => $row['token']				
-				);
+				if($updateToken !== false) {
+					session_start();
+					$_SESSION['start'] = time(); // Taking now logged in time.
+					// Ending a session in 30 minutes from the starting time.
+					
+					$_SESSION['token'] = $token;
+					$_SESSION['expire'] = $_SESSION['start'] + (30 * 60); //30*60 for half an hour
+				
+					$response = array(
+						'status' => "success",
+						$col => $row[$col],
+						'token' => $token				
+					);
+				}
 			}
 			else
 			{
@@ -51,8 +71,7 @@
 					'status_message' =>"Invalid username or password"
 				);
 			}
-		}
-			
+		}			
 	}
 	else
 	{

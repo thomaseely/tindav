@@ -1,4 +1,19 @@
 <?php
+	/**
+	Client: Tindav.com
+	API name: use this address as current address
+	Filename: use_this_address.php
+	//provider mandatory parameters
+	Params:	parent_id or sitter_id and address information
+	//seeker mandatory parameters
+	
+	API vertion: 1.0
+	Created By: Thomas
+	Created On: 28-08-2018
+	Modified On: 29-08-2018
+	Description: This API is used to register the user like Provider or Seeker with children information .
+	*/
+	
 	session_start();	
 	if (!isset($_SESSION['token'])) {
         echo "Please Login again";
@@ -20,6 +35,7 @@
 	if(($data["parent_id"] !='' || $data["sitter_id"] !='') && $data["address"] !='' ) 
 	{
 		$query = "UPDATE address_info SET status=0 WHERE ";	
+		
 		if($data['parent_id']!=""){
 			$query .=" parent_id='".$data["parent_id"]."'";
 		}
@@ -29,8 +45,7 @@
 		}
 		
 		if(mysqli_query($connection, $query) or die("Error:".mysqli_error($connection)))
-		{
-		
+		{		
 			$query = "INSERT INTO address_info SET ";
 
 			if($data['parent_id']!=""){
@@ -40,9 +55,9 @@
 				$query .=" sitter_id='".$data["sitter_id"]."'";
 			}
 			
-			$query .= ", address='".$data["address"]."', city='".
-						$data["city"]."', state='".$data["state"]."', country='".
-						$data["country"]."', zipcode='".$data["zipcode"]."', created_on=now(), status = 1"; //1 means current address
+			$query .= ", address='".sanitize($data["address"])."', city='".
+						sanitize($data["city"])."', state='".sanitize($data["state"])."', country='".
+						sanitize($data["country"])."', zipcode='".sanitize($data["zipcode"])."', created_on=now(), status = 1"; //1 means current address
 						
 			if(mysqli_query($connection, $query) or die("Error:".mysqli_error($connection)))
 			{				
@@ -60,7 +75,7 @@
 			{
 				$response = array(
 					'status' => "failure",
-					'status_message' =>" Review added Failed."
+					'status_message' =>" Address added Failed."
 				);
 			}
 		}

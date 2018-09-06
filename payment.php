@@ -1,4 +1,19 @@
 <?php
+	/**
+	Client: Tindav.com
+	API name: payment
+	Filename: payment.php
+	//provider mandatory parameters
+	Params:	token, sitter_id, card_type, name, number, cvv, amount
+	//seeker mandatory parameters
+	
+	API vertion: 1.0
+	Created By: Thomas
+	Created On: 28-08-2018
+	Modified On: 29-08-2018
+	Description: This API is used to add payment information .
+	*/
+	
 	session_start();	
 	if (!isset($_SESSION['token'])) {
         echo "Please Login again";
@@ -20,16 +35,16 @@
 	if($data["token"] !='' && $data["sitter_id"] !='' && $data["payment_method"] !='' && $data["card_holder_name"]!='' && $data["card_type"] !='' && $data["card_number"] !='' 
 	&& $data["card_expiry"] !='' && $data["cvv"] !='' && $data["gateway_used"] !='' && $data["gateway_response"] !='' && $data["amount"] !='') 
 		{
-			$user_id = isValidToken($data["token"]);	
+			$row = isValidToken($data["token"]);	
 			
-			if($user_id !== false) {
+			if($row !== false) {
 				
-				$query = "INSERT INTO transaction_details SET user_id='".$user_id."', sitter_id='".
-							$data["sitter_id"]."', payment_method='".$data["payment_method"]."', card_holder_name='".
-							$data["card_holder_name"]."', card_type='".$data["card_type"]."', card_number='".
-							$data["card_number"]."', card_expiry='".$data["card_expiry"]."', cvv='".
-							$data["cvv"]."', gateway_used='".$data["gateway_used"]."', gateway_response='".
-							$data["gateway_response"]."', amount='".$data["amount"]."', paid_on=now(), status='ok'";
+				$query = "INSERT INTO transaction_details SET sitter_id='".
+							sanitize($data["sitter_id"])."', payment_method='".sanitize($data["payment_method"])."', card_holder_name='".
+							sanitize($data["card_holder_name"])."', card_type='".sanitize($data["card_type"])."', card_number='".
+							sanitize($data["card_number"])."', card_expiry='".sanitize($data["card_expiry"])."', cvv='".
+							sanitize($data["cvv"])."', gateway_used='".sanitize($data["gateway_used"])."', gateway_response='".
+							sanitize($data["gateway_response"])."', amount='".sanitize($data["amount"])."', paid_on=now(), status='ok'";
 			
 				if(mysqli_query($connection, $query) or die("Error:".mysqli_error($connection)))
 				{		
@@ -62,7 +77,7 @@
 		{
 			$response = array(
 				'status' => "failure",
-				'status_message' => "Missing Fileds on Transaction."
+				'status_message' => "Missing Fileds on Transaction details."
 			);
 		}	
 		
