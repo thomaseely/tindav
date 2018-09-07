@@ -24,7 +24,8 @@
 	$data = json_decode(file_get_contents('php://input'), true);
 
 	//CHECK PARAMS
-	if($data["first_name"] !='' && $data["last_name"] !='' && $data["username"] !='' && $data["password"] !='' && $data["phone"] !='' && $data["address"] !='' && $data["user_type"] !='') 
+	if($data["first_name"] !='' && $data["last_name"] !='' && $data["username"] !='' && $data["password"] !='' 
+		&& $data["phone"] !='' && $data["address"] !='' && $data["user_type"] !='' && ($data["user_type"]=="sitter" || $data["user_type"]=="parent")) 
 	{		
 		$checkUserName = isUsernameExists($data["username"],$data["user_type"]); //check username is exists
 		
@@ -91,7 +92,7 @@
 	{
 		$response = array(
 			'status' => "failure",
-			'status_message' =>"Missing any Fileds first_name, last_name, username, password, phone or address and user_type"
+			'status_message' =>"Missing any Fileds first_name, last_name, username, password, phone or address and user_type(parent or sitter)"
 		);
 	}	
 		

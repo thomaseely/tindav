@@ -30,9 +30,7 @@
 		
 		$col = ($user_type === "parent")? "parent_id":"sitter_id";		
 		$tbl = ($user_type === "sitter")? "sitters":"parents";
-		
-		$token = md5(sha1($username.$password));	//generate token	
-		
+					
 	    $query = "SELECT $col FROM $tbl 
 								WHERE username = '".sanitize($username)."' 
 								AND password = '".base64_encode(sanitize($password))."'
@@ -46,7 +44,8 @@
 			
 			if(!empty($row)){	
 				//generate new token
-				$token = md5(uniqid(rand(), true));
+				$str = $row['username'].$row['password'];
+				$token = md5(uniqid($str, true));
 				$updateToken = updateToken($token, $tbl, $col, $row[$col]);
 				
 				if($updateToken !== false) {

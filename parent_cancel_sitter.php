@@ -35,14 +35,16 @@
 	//CHECK PARAMS
 	if($data["parent_id"] !='' && $data["sitter_id"] !='' && $data["cancel_review"] !='' && $data["parent_sitter_id"]!='') 
 	{			
-		$query = "UPDATE parents_sitters SET status = 1 WHERE parent_sitter_id='".sanitize($data["parent_sitter_id"])."'";
+		$query = "UPDATE parents_sitters SET status = 1 WHERE parent_id='".sanitize($data["parent_id"])."' 
+														AND sitter_id='".sanitize($data["sitter_id"])."' 
+														AND status=0";
 			
 		if(mysqli_query($connection, $query) or die("Error:".mysqli_error($connection)))
 		{				
 			//success response					
 			$response = array(
 				'status' => "success",				
-				'status_message' =>" Sitter canceled successfully."
+				'status_message' =>" Sitter cancelled successfully."
 			);			
 		}
 		else
@@ -62,7 +64,7 @@
 				//success response					
 				$response = array(
 					'status' => "success",				
-					'status_message' =>" Sitter canceled successfully."
+					'status_message' =>" Your sitter cancelled successfully."
 				);			
 			}
 			else

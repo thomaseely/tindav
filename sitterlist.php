@@ -35,7 +35,7 @@
 		if( isValidToken($token,$user_type)!== false ) 
 		{
 			$query = "SELECT s.sitter_id, s.first_name, s.last_name, s.description, s.rate, s.photo, s.phone, s.ages_handling, 
-						s.service_start_date, s.service_end_date,s.service_timeslot, a.address, a.city, a.state, a.country, a.zipcode  
+					  s.service_start_date, s.service_end_date,s.service_timeslot, a.address, a.city, a.state, a.country, a.zipcode  
 					  FROM sitters s LEFT JOIN address_info a 
 					  ON s.sitter_id = a.sitter_id ";
 			

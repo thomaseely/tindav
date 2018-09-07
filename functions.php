@@ -28,10 +28,11 @@
 		return false;	
 	}
 	
+	//check token is valid or not
 	function isValidToken($token, $user_type){
 		global $connection;
 		
-		if($token !='') {
+		if($token !='' && $user_type !='') {
 			$tbl = ($user_type === "sitter")? "sitters":"parents";
 			$col = ($user_type === "parent")? "parent_id":"sitter_id";	
 			
@@ -48,7 +49,6 @@
 		
 		global $connection;
 		
-		//Check in parents table
 		$query = "SELECT parent_id FROM child_info WHERE parent_id='".$parent_id."' LIMIT 1";						
 		$result = mysqli_query($connection,$query) or die("Error:".mysqli_error($connection));			
 		// Associative array
@@ -61,7 +61,6 @@
 		
 		global $connection;
 		
-		//Check in parents table
 		$query = "SELECT zipcode FROM address_info WHERE zipcode='".$zipcode."' LIMIT 1";						
 		$result = mysqli_query($connection,$query) or die("Error:".mysqli_error($connection));			
 		// Associative array
@@ -76,7 +75,7 @@
 		if($input !=""){
 			return $connection->real_escape_string(trim($input));
 		}
-		return false;
+		return '';
 	}
 	
 	function isValidSession() {
@@ -87,6 +86,37 @@
 			exit;
 		}
 		return true;
+	}
+	
+	function isParentBookedSitter($parent_id, $sitter_id) {
+		
+		if($parent_id!='' && $sitter_id !='') {
+			$query = "SELECT parent_sitter_id FROM parents_sitters 
+						WHERE parent_id='".sanitize($data["parent_id"])."' 
+						AND sitter_id='".sanitize($data["sitter_id"])."'
+						AND status=0 LIMIT 1";						
+			$result = mysqli_query($connection,$query) or die("Error:".mysqli_error($connection));				
+			$row = mysqli_fetch_assoc($result);
+			if($row['parent_sitter_id']!='') return true;		
+		}
+		return false;
+	}
+	
+	function checkOldPassword($token, $user_type, $oldpassword) {
+		global $connection;
+		
+		$tbl = ($user_type === "sitter")? "sitters":"parents";
+		$col = ($user_type === "parent")? "parent_id":"sitter_id";	
+			
+		if($token !='' && $oldpassword != "") {
+			$query = "SELECT $col FROM $tbl WHERE token='".sanitize($token)."' 
+						AND password = '".base64_encode(sanitize($oldpassword))."' AND status=0  LIMIT 1";						
+			$result = mysqli_query($connection,$query) or die("Error:".mysqli_error($connection));			
+			// Associative array
+			$row = mysqli_fetch_assoc($result);
+			if($row["$col"]!='') return $row["$col"];			
+		}
+		return false;
 	}
 	
 ?>

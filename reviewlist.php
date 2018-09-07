@@ -1,4 +1,17 @@
 <?php
+	/**
+	Client: Tindav.com
+	API name: Reviews list, Get request
+	Filename: reviewlist.php
+	
+	Params: token, user_type
+	
+	API vertion: 1.0
+	Created By: Thomas
+	Created On: 29-08-2018
+	Modified On: 13-08-2018
+	Description: This API is used to register the user like Sitter or Parent .
+	*/
 	session_start();	
 	if (!isset($_SESSION['token'])) {
         echo "Please Login again";
@@ -19,14 +32,14 @@
 	
 	if(isset($token) && !empty($token) && !empty($user_type)) 
 	{			
-		$row = isValidToken($token, $user_type);
+		$valid = isValidToken($token, $user_type);
 		
-		if(!empty($row)) {
+		if($valid !== false) {
 			
-			if($row['sitter_id'] !='') {
+			if($valid['sitter_id'] !='') {
 				$query = "SELECT p.first_name, p.last_name,r.rating, r.reviews,r.created_on 
 							FROM parents p LEFT JOIN parents_reviews r ON p.parent_id = r.parent_id 
-							WHERE r.sitter_id = '".$row['sitter_id']."'";
+							WHERE r.sitter_id = '".$valid['sitter_id']."'";
 			
 				//echo $query;exit;
 							

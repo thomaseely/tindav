@@ -33,7 +33,7 @@
 	$data = json_decode(file_get_contents('php://input'), true);
 	
 	//CHECK PARAMS
-	if($data["token"] !='' && $data["user_type"]!='')
+	if($data["token"] !='' && ($data["user_type"]=='parent' || $data["user_type"]=='sitter'))
 	{		
 		$row = isValidToken($data["token"], $data["user_type"]);
 			
@@ -70,31 +70,29 @@
 				}			
 				if(isset($data["phone"]) && $data["phone"]!='') {
 					$query .= " phone='".sanitize($data["phone"])."',";			
-				}
+				}				
 				
-				$query = substr($query, 0, -1);
-				
-				$query .= " WHERE parent_id='".sanitize($row['parent_id'])."'";				
+				$query .= " modified_on=now() WHERE parent_id='".sanitize($row['parent_id'])."'";				
 			}
 
 			if(mysqli_query($connection, $query) or die("Error:".mysqli_error($connection)))
 			{															
-				if( $row["parent_id"] != '' && $data["no_of_child_tocare"] > 0 ) { 
+				if( $row["parent_id"] != '' && !empty( $data["children"]) && $data["no_of_child_tocare"] > 0 ) { 
 					
-					$isThereChildOfParent = isThereChildOfParent($row["parent_id");
+					$isThereChildOfParent = isThereChildOfParent($row["parent_id"]);
 					
 					if($isThereChildOfParent === true) {
 						$query = "DELETE FROM child_info WHERE parent_id = '".sanitize($row['parent_id'])."' ";
 						mysqli_query($connection, $query) or die("Error:".mysqli_error($connection));
 					}
 					
-					for($i = 0; $i < $data['no_of_child_tocare']; $i++){ // get the number of children of seeker					
+					for($i = 0; $i < count($data['children']); $i++){ // get the number of children of seeker					
 													
 						$query = "INSERT INTO child_info SET parent_id = '".sanitize($row['parent_id'])."', child_first_name = '".
 									sanitize($data['children'][$i]["child_first_name"])."', child_last_name = '".
 									sanitize($data['children'][$i]["child_last_name"])."', child_gender = '".
 									sanitize($data['children'][$i]["child_gender"])."', child_age = '".
-									sanitize($data['children'][$i]["child_age"])."' created_on = now()";	
+									sanitize($data['children'][$i]["child_age"])."' , created_on = now()";	
 									
 						//insert childrens information into child info table 			
 						if(mysqli_query($connection, $query) or die("Error:".mysqli_error($connection)))
@@ -117,7 +115,7 @@
 					$response = array(
 						'status' => "success",
 						'data' => $data,					
-						'status_message' => "Updation successfull."
+						'status_message' =>  $data['user_type']." Updated successfully."
 					);
 					
 				}			
@@ -136,7 +134,7 @@
 	{
 		$response = array(
 			'status' => "failure",
-			'status_message' => "Missing fields token and user_type."
+			'status_message' => "Missing fields token and user_type(parent or sitter)."
 		);
 	}	
 		

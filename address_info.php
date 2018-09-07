@@ -33,8 +33,7 @@
 
 	//CHECK PARAMS
 	if(($data["parent_id"] !='' || $data["sitter_id"] !='') && $data["address_add"] !='' ) 
-	{		
-		
+	{			
 		$query = "INSERT INTO address_info SET ";
 
 		if($data['parent_id']!=""){
