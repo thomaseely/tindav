@@ -31,82 +31,87 @@
 	//GET RAW INPUT
 	$data = json_decode(file_get_contents('php://input'), true);
 
-	//CHECK PARAMS
-	if(($data["parent_id"] !='' || $data["sitter_id"] !='') && $data["address_add"] !='' ) 
-	{			
-		$query = "INSERT INTO address_info SET ";
+	try {
+		//CHECK PARAMS
+		if(($data["parent_id"] !='' || $data["sitter_id"] !='') && $data["address_add"] !='' ) 
+		{			
+			$query = "INSERT INTO address_info SET ";
 
-		if($data['parent_id']!=""){
-			$query .=" parent_id='".$data["parent_id"]."'";
+			if($data['parent_id']!=""){
+				$query .=" parent_id='".$data["parent_id"]."'";
+			}
+			if($data['sitter_id']!=""){
+				$query .=" sitter_id='".$data["sitter_id"]."'";
+			}
+			
+			$query .= ", address='".sanitize($data["address"])."', city='".
+						sanitize($data["city"])."', state='".sanitize($data["state"])."', country='".
+						sanitize($data["country"])."', zipcode='".sanitize($data["zipcode"])."', created_on=now(), status = 0";
+						
+			if(mysqli_query($connection, $query) or die("Error:".mysqli_error($connection)))
+			{				
+				$lastinsertid = mysqli_insert_id($connection);
+				//success response					
+				$response = array(
+					'status' => "success",
+					'address_id' => $lastinsertid,
+					'status_message' =>" Address added successfully."
+				);
+				
+			}
+			
+			//failure response
+			else
+			{
+				$response = array(
+					'status' => "failure",
+					'status_message' =>"Adding Address Failed."
+				);
+			}	
 		}
-		if($data['sitter_id']!=""){
-			$query .=" sitter_id='".$data["sitter_id"]."'";
-		}
-		
-		$query .= ", address='".sanitize($data["address"])."', city='".
-					sanitize($data["city"])."', state='".sanitize($data["state"])."', country='".
-					sanitize($data["country"])."', zipcode='".sanitize($data["zipcode"])."', created_on=now(), status = 0";
-					
-		if(mysqli_query($connection, $query) or die("Error:".mysqli_error($connection)))
-		{				
-			$lastinsertid = mysqli_insert_id($connection);
-			//success response					
-			$response = array(
-				'status' => "success",
-				'address_id' => $lastinsertid,
-				'status_message' =>" Address added successfully."
-			);
+		else if($data['address_id']!="" ){	
+
+			//TO cancel the reviews make status to 1
+			if($data['address_delete'] !="") {
+				$query = "DELETE FROM address_info WHERE address_id='".sanitize($data["address_id"])."'";			
+				
+				if(mysqli_query($connection, $query) or die("Error:".mysqli_error($connection))){
+					$response = array(
+						'status' => "success",
+						'status_message' =>" Address deleted successfully."
+					);
+				}
+			}	
+			else if($data['address_edit'] !="") {
+				$query = "UPDATE address_info SET address='".sanitize($data["address"])."', city='".
+							sanitize($data["city"])."', state='".sanitize($data["state"])."', country='".
+							sanitize($data["country"])."', zipcode='".sanitize($data["zipcode"])."' 
+							WHERE address_id='".sanitize($data["address_id"])."'";			
+				
+			}
+			else {//make address to current address , so set status=1 for current, 0 old address
+				$query = "UPDATE address_info SET status='1' WHERE address_id='".sanitize($data["address_id"])."'";
+				
+				if(mysqli_query($connection, $query) or die("Error:".mysqli_error($connection))){
+					$response = array(
+						'status' => "success",
+						'address_id' => $data['address_id'],
+						'status_message' =>" Address activated successfully."
+					);
+				}
+			}		
 			
 		}
-		
-		//failure response
 		else
 		{
 			$response = array(
 				'status' => "failure",
-				'status_message' =>"Adding Address Failed."
+				'status_message' =>"Missing Fileds with address_add or address_edit or address_delete accordingly "
 			);
-		}	
-	}
-	else if($data['address_id']!="" ){	
-
-		//TO cancel the reviews make status to 1
-		if($data['address_delete'] !="") {
-			$query = "DELETE FROM address_info WHERE address_id='".sanitize($data["address_id"])."'";			
-			
-			if(mysqli_query($connection, $query) or die("Error:".mysqli_error($connection))){
-				$response = array(
-					'status' => "success",
-					'status_message' =>" Address deleted successfully."
-				);
-			}
-		}	
-		else if($data['address_edit'] !="") {
-			$query = "UPDATE address_info SET address='".sanitize($data["address"])."', city='".
-						sanitize($data["city"])."', state='".sanitize($data["state"])."', country='".
-					    sanitize($data["country"])."', zipcode='".sanitize($data["zipcode"])."' 
-						WHERE address_id='".sanitize($data["address_id"])."'";			
-			
 		}
-		else {//make address to current address , so set status=1 for current, 0 old address
-			$query = "UPDATE address_info SET status='1' WHERE address_id='".sanitize($data["address_id"])."'";
-			
-			if(mysqli_query($connection, $query) or die("Error:".mysqli_error($connection))){
-				$response = array(
-					'status' => "success",
-					'address_id' => $data['address_id'],
-					'status_message' =>" Address activated successfully."
-				);
-			}
-		}		
-		
-	}
-	else
-	{
-		$response = array(
-			'status' => "failure",
-			'status_message' =>"Missing Fileds with address_add or address_edit or address_delete accordingly "
-		);
+	
+	} catch(Exception $e){
+		echo 'Exception: ' .$e->getMessage();
 	}	
 		
 	header('Content-Type: application/json');

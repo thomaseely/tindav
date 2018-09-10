@@ -22,72 +22,80 @@
 	require("../connection.php");
 	require("functions.php");	
 	
-	$isValidSession = isValidSession();	
-	if(!$isValidSession) exit;
-	
-	//DB CONNECTION
-	$db = new dbObj();
-	$connection =  $db->getConnstring();
-	
-	//GET RAW INPUT
-	$data = json_decode(file_get_contents('php://input'), true);
-	
-	if(($data["parent_id"] !='' || $data["sitter_id"] !='') && $data["address"] !='' ) 
-	{
-		$query = "UPDATE address_info SET status=0 WHERE ";	
+	try {
+		$isValidSession = isValidSession();	
+		if(!$isValidSession) exit;
 		
-		if($data['parent_id']!=""){
-			$query .=" parent_id='".$data["parent_id"]."'";
-		}
+		//DB CONNECTION
+		$db = new dbObj();
+		$connection =  $db->getConnstring();
 		
-		if($data['sitter_id']!=""){
-			$query .=" sitter_id='".$data["sitter_id"]."'";
-		}
+		//GET RAW INPUT
+		$data = json_decode(file_get_contents('php://input'), true);
 		
-		if(mysqli_query($connection, $query) or die("Error:".mysqli_error($connection)))
-		{		
-			$query = "INSERT INTO address_info SET ";
-
+		if(($data["parent_id"] !='' || $data["sitter_id"] !='') && $data["address"] !='' ) 
+		{
+			$query = "UPDATE address_info SET status=0 WHERE ";	
+			
 			if($data['parent_id']!=""){
 				$query .=" parent_id='".$data["parent_id"]."'";
 			}
+			
 			if($data['sitter_id']!=""){
 				$query .=" sitter_id='".$data["sitter_id"]."'";
 			}
 			
-			$query .= ", address='".sanitize($data["address"])."', city='".
-						sanitize($data["city"])."', state='".sanitize($data["state"])."', country='".
-						sanitize($data["country"])."', zipcode='".sanitize($data["zipcode"])."', created_on=now(), status = 1"; //1 means current address
-						
 			if(mysqli_query($connection, $query) or die("Error:".mysqli_error($connection)))
-			{				
-				$lastinsertid = mysqli_insert_id($connection);
-				//success response					
-				$response = array(
-					'status' => "success",
-					'address_id' => $lastinsertid,
-					'status_message' =>" Address added successfully."
-				);				
+			{		
+				$query = "INSERT INTO address_info SET ";
+
+				if($data['parent_id']!=""){
+					$query .=" parent_id='".$data["parent_id"]."'";
+				}
+				if($data['sitter_id']!=""){
+					$query .=" sitter_id='".$data["sitter_id"]."'";
+				}
+				
+				$query .= ", address='".sanitize($data["address"])."', city='".
+							sanitize($data["city"])."', state='".sanitize($data["state"])."', country='".
+							sanitize($data["country"])."', zipcode='".sanitize($data["zipcode"])."', created_on=now(), status = 1"; //1 means current address
+							
+				if(mysqli_query($connection, $query) or die("Error:".mysqli_error($connection)))
+				{				
+					$lastinsertid = mysqli_insert_id($connection);
+					//success response					
+					$response = array(
+						'status' => "success",
+						'address_id' => $lastinsertid,
+						'status_message' =>" Address added successfully."
+					);				
+				}
+				
+				//failure response
+				else
+				{
+					$response = array(
+						'status' => "failure",
+						'status_message' =>" Address added Failed."
+					);
+				}
 			}
-			
-			//failure response
 			else
 			{
 				$response = array(
 					'status' => "failure",
-					'status_message' =>" Address added Failed."
+					'status_message' =>" Update address Failed."
 				);
 			}
-		}
-		else
-		{
-			$response = array(
-				'status' => "failure",
-				'status_message' =>" Update address Failed."
-			);
+			
 		}
 		
+	} catch(Exception $e){
+		echo 'Exception: ' .$e->getMessage();
 	}
+	
+	header('Content-Type: application/json');
+	echo json_encode($response);	
 
 
 ?>

@@ -24,29 +24,33 @@
 	//GET RAW INPUT
 	$data = json_decode(file_get_contents('php://input'), true);
 
-	//CHECK PARAMS
-	if($data["zipcode"] !='') 
-	{			
-		$isZipcodeAvailable = isZipcodeAvailable($data["zipcode"]);
-			
-		if($isZipcodeAvailable === false)
-		{				
-			//success response					
-			$response = array(
-				'status' => "success",				
-				'status_message' =>" Sorry, not serving in this area. Please leave your email address and we will notify you when we start."
-			);			
+	try {
+		//CHECK PARAMS
+		if($data["zipcode"] !='') 
+		{			
+			$isZipcodeAvailable = isZipcodeAvailable($data["zipcode"]);
+				
+			if($isZipcodeAvailable === false)
+			{				
+				//success response					
+				$response = array(
+					'status' => "success",				
+					'status_message' =>" Sorry, not serving in this area. Please leave your email address and we will notify you when we start."
+				);			
+			}
 		}
-	}
-	else
-	{		
-		$response = array(
-			'status' => "failure",
-			'status_message' => "Missing parameter zipcode."
-		);
-	}
+		else
+		{		
+			$response = array(
+				'status' => "failure",
+				'status_message' => "Missing parameter zipcode."
+			);
+		}
 		
-		
+	} catch(Exception $e){
+		echo 'Exception: ' .$e->getMessage();
+	}
+	
 	header('Content-Type: application/json');
 	echo json_encode($response);	
 	

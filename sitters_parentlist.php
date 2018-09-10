@@ -21,67 +21,72 @@
 	require("../connection.php");
 	require("functions.php");	
 	
-	$isValidSession = isValidSession();	
-	if(!$isValidSession) exit;
-	
-	if(isset($_GET)) extract($_GET);
-	
-	$db = new dbObj();
-	$connection =  $db->getConnstring();
-	
-	$data = json_decode(file_get_contents('php://input'), true);	
-	
-	if(isset($token) && !empty($token) && !empty($user_type)) 
-	{			
-		$valid = isValidToken($token,$user_type);
+	try {
+		$isValidSession = isValidSession();	
+		if(!$isValidSession) exit;
 		
-		if($valid !== false) 
-		{  
-			$query = "SELECT p.parent_id, p.first_name, p.last_name, p.service_type, p.start_date, p.start_time, p.end_date, p.end_time, 
-					  a.address, a.city, a.state, a.country, a.zipcode, ps.rate, ps.created_on					  
-					  FROM parents p LEFT JOIN parents_sitters ps ON p.parent_id = ps.parent_id  
-					  LEFT JOIN address_info a on ps.parent_id = a.parent_id 
-					  WHERE ps.sitter_id = '".$valid['sitter_id']."'
-					  ORDER BY p.start_date DESC";
+		if(isset($_GET)) extract($_GET);
+		
+		$db = new dbObj();
+		$connection =  $db->getConnstring();
+		
+		$data = json_decode(file_get_contents('php://input'), true);	
+		
+		if(isset($token) && !empty($token) && !empty($user_type)) 
+		{			
+			$valid = isValidToken($token,$user_type);
 			
-			//echo $query;exit;
-						
-			$result = mysqli_query($connection,$query) or die("Error:".mysqli_error($connection));			
-			
-			if(!empty($result))
-			{
-				$parents = array();
-				// Associative array
-				while($row = mysqli_fetch_assoc($result)) {
-					$parents[] = $row;
+			if($valid !== false) 
+			{  
+				$query = "SELECT p.parent_id, p.first_name, p.last_name, p.service_type, p.start_date, p.start_time, p.end_date, p.end_time, 
+						  a.address, a.city, a.state, a.country, a.zipcode, ps.rate, ps.created_on					  
+						  FROM parents p LEFT JOIN parents_sitters ps ON p.parent_id = ps.parent_id  
+						  LEFT JOIN address_info a on ps.parent_id = a.parent_id 
+						  WHERE ps.sitter_id = '".$valid['sitter_id']."'
+						  ORDER BY p.start_date DESC";
+				
+				//echo $query;exit;
+							
+				$result = mysqli_query($connection,$query) or die("Error:".mysqli_error($connection));			
+				
+				if(!empty($result))
+				{
+					$parents = array();
+					// Associative array
+					while($row = mysqli_fetch_assoc($result)) {
+						$parents[] = $row;
+					}
+					$response = array(
+						'status' => "success",					
+						'upcoming_parent_list' => $parents					
+					);
 				}
-				$response = array(
-					'status' => "success",					
-					'upcoming_parent_list' => $parents					
-				);
+				else
+				{
+					$response = array(
+						'status' => "failure",
+						'status_message' => "Record not found."
+					);
+				}
 			}
 			else
-			{
+			{		
 				$response = array(
 					'status' => "failure",
-					'status_message' => "Record not found."
+					'status_message' => "Token is invalid."
 				);
-			}
+			}	
 		}
 		else
 		{		
 			$response = array(
 				'status' => "failure",
-				'status_message' => "Token is invalid."
+				'status_message' => "Missing parameter token."
 			);
-		}	
-	}
-	else
-	{		
-		$response = array(
-			'status' => "failure",
-			'status_message' => "Missing parameter token."
-		);
+		}
+	
+	} catch(Exception $e){
+		echo 'Exception: ' .$e->getMessage();
 	}
 	
 	header('Content-Type: application/json');

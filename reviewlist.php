@@ -20,6 +20,7 @@
 	require("../connection.php");
 	require("functions.php");	
 	
+	try {
 	$isValidSession = isValidSession();	
 	if(!$isValidSession) exit;
 	
@@ -82,6 +83,9 @@
 		);
 	}
 	
+	} catch(Exception $e){
+		echo 'Exception: ' .$e->getMessage();
+	}
 	
 	header('Content-Type: application/json');
 	echo json_encode($response);

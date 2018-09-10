@@ -21,75 +21,79 @@
 	require("../connection.php");
 	require("functions.php");	
 	
-	$isValidSession = isValidSession();	
-	if(!$isValidSession) exit;
+	try { 
 	
-	//DB CONNECTION
-	$db = new dbObj();
-	$connection =  $db->getConnstring();
-	
-	//GET RAW INPUT
-	$data = json_decode(file_get_contents('php://input'), true);
-	
-	//CHECK PARAMS
-	if($data["token"] !='' && ($data["user_type"]=='parent' || $data["user_type"]=='sitter'))
-	{		
-		$row = isValidToken($data["token"], $data["user_type"]);		
-
+		$isValidSession = isValidSession();	
+		if(!$isValidSession) exit;
+		
+		//DB CONNECTION
+		$db = new dbObj();
+		$connection =  $db->getConnstring();
+		
+		//GET RAW INPUT
+		$data = json_decode(file_get_contents('php://input'), true);
+		
 		//CHECK PARAMS
-		if($row["parent_id"] !='' || $row["sitter_id"] !='' && $data["oldpassword"] !='' && $data["newpassword"] !='') 
+		if($data["token"] !='' && ($data["user_type"]=='parent' || $data["user_type"]=='sitter'))
 		{		
-			$checkOldPassword = checkOldPassword($data["token"], $data["user_type"], $data["oldpassword"]);
-						
-			$tbl = ($data["user_type"] === "sitter")? "sitters":"parents";
-			$col = ($data["user_type"] === "parent")? "parent_id":"sitter_id";	
-			
-			if($checkOldPassword !== false) {
+			$row = isValidToken($data["token"], $data["user_type"]);		
+
+			//CHECK PARAMS
+			if($row["parent_id"] !='' || $row["sitter_id"] !='' && $data["oldpassword"] !='' && $data["newpassword"] !='') 
+			{		
+				$checkOldPassword = checkOldPassword($data["token"], $data["user_type"], $data["oldpassword"]);
+							
+				$tbl = ($data["user_type"] === "sitter")? "sitters":"parents";
+				$col = ($data["user_type"] === "parent")? "parent_id":"sitter_id";	
 				
-				$query = "UPDATE $tbl SET password='".sanitize($data["newpassword"])."'	
-							WHERE token ='".sanitize($data["token"])."' AND $col ='".$checkOldPassword."'";
+				if($checkOldPassword !== false) {
 					
-				if(mysqli_query($connection, $query) or die("Error:".mysqli_error($connection)))
-				{				
-					//success response					
-					$response = array(
-						'status' => "success",				
-						'status_message' =>" Password changed successfully."
-					);			
+					$query = "UPDATE $tbl SET password='".sanitize($data["newpassword"])."'	
+								WHERE token ='".sanitize($data["token"])."' AND $col ='".$checkOldPassword."'";
+						
+					if(mysqli_query($connection, $query) or die("Error:".mysqli_error($connection)))
+					{				
+						//success response					
+						$response = array(
+							'status' => "success",				
+							'status_message' =>" Password changed successfully."
+						);			
+					}
+					else
+					{
+						$response = array(
+							'status' => "failure",
+							'status_message' =>" Password change failed."
+						);
+					}
 				}
 				else
 				{
 					$response = array(
 						'status' => "failure",
-						'status_message' =>" Password change failed."
+						'status_message' =>" Passwords are mismatch."
 					);
-				}
+				}			
+					
 			}
 			else
-			{
+			{		
 				$response = array(
 					'status' => "failure",
-					'status_message' =>" Passwords are mismatch."
+					'status_message' => "Missing parameter parent_id, sitter_id, oldpassword, newpassword."
 				);
-			}			
-				
+			}
 		}
 		else
-		{		
+		{
 			$response = array(
 				'status' => "failure",
-				'status_message' => "Missing parameter parent_id, sitter_id, oldpassword, newpassword."
+				'status_message' => "Missing fields token or invalid and user_type(parent or sitter)."
 			);
-		}
-	}
-	else
-	{
-		$response = array(
-			'status' => "failure",
-			'status_message' => "Missing fields token or invalid and user_type(parent or sitter)."
-		);
+		}	
+	} catch(Exception $e){
+		echo 'Exception: ' .$e->getMessage();
 	}	
-		
 		
 	header('Content-Type: application/json');
 	echo json_encode($response);	

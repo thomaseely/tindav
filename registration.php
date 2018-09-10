@@ -23,78 +23,83 @@
 	//GET RAW INPUT
 	$data = json_decode(file_get_contents('php://input'), true);
 
-	//CHECK PARAMS
-	if($data["first_name"] !='' && $data["last_name"] !='' && $data["username"] !='' && $data["password"] !='' 
-		&& $data["phone"] !='' && $data["address"] !='' && $data["user_type"] !='' && ($data["user_type"]=="sitter" || $data["user_type"]=="parent")) 
-	{		
-		$checkUserName = isUsernameExists($data["username"],$data["user_type"]); //check username is exists
-		
-		if($checkUserName === false) {
-					
-			$password = base64_encode(sanitize($data["password"]));
+	try {
+		//CHECK PARAMS
+		if($data["first_name"] !='' && $data["last_name"] !='' && $data["username"] !='' && $data["password"] !='' 
+			&& $data["phone"] !='' && $data["address"] !='' && $data["user_type"] !='' && ($data["user_type"]=="sitter" || $data["user_type"]=="parent")) 
+		{		
+			$checkUserName = isUsernameExists($data["username"],$data["user_type"]); //check username is exists
 			
-			$tbl = ($data["user_type"] === "sitter")? "sitters":"parents";
-			
-			$query = "INSERT INTO $tbl SET first_name='".
-						sanitize($data["first_name"])."', last_name='".sanitize($data["last_name"])."', username='".
-						sanitize($data["username"])."', password='".$password."', phone='".
-						sanitize($data["phone"])."', created_on=now(), status=0";			
-
-			if(mysqli_query($connection, $query) or die("Error:".mysqli_error($connection)))
-			{				
-				$lastinsertid = mysqli_insert_id($connection);
+			if($checkUserName === false) {
+						
+				$password = base64_encode(sanitize($data["password"]));
 				
-				if($data['address'] !='') {
-					//add address info table
-					$query = "INSERT INTO address_info SET ";
+				$tbl = ($data["user_type"] === "sitter")? "sitters":"parents";
+				
+				$query = "INSERT INTO $tbl SET first_name='".
+							sanitize($data["first_name"])."', last_name='".sanitize($data["last_name"])."', username='".
+							sanitize($data["username"])."', password='".$password."', phone='".
+							sanitize($data["phone"])."', created_on=now(), status=0";			
+
+				if(mysqli_query($connection, $query) or die("Error:".mysqli_error($connection)))
+				{				
+					$lastinsertid = mysqli_insert_id($connection);
 					
-					if($data["user_type"] === 'sitter') {	
-						$query .=" sitter_id='".$lastinsertid."',";
-					}
-					if($data["user_type"] === 'parent') {	
-						$query .=" parent_id='".$lastinsertid."',";
-					}
-					
-					$query .=" address='".sanitize($data["address"])."', city='".
-								sanitize($data["city"])."', state='".sanitize($data["state"])."', country='".
-								sanitize($data["country"])."', zipcode='".sanitize($data["zipcode"])."', created_on=now(), status=0";
-								
-					if(mysqli_query($connection, $query) or die("Error:".mysqli_error($connection)))
-					{
-						//success response					
-						$response = array(
-							'status' => "success",
-							$data['user_type'] => $lastinsertid,
-							'status_message' => $data['user_type']." Registration successfull."
-						);	
-					}
+					if($data['address'] !='') {
+						//add address info table
+						$query = "INSERT INTO address_info SET ";
+						
+						if($data["user_type"] === 'sitter') {	
+							$query .=" sitter_id='".$lastinsertid."',";
+						}
+						if($data["user_type"] === 'parent') {	
+							$query .=" parent_id='".$lastinsertid."',";
+						}
+						
+						$query .=" address='".sanitize($data["address"])."', city='".
+									sanitize($data["city"])."', state='".sanitize($data["state"])."', country='".
+									sanitize($data["country"])."', zipcode='".sanitize($data["zipcode"])."', created_on=now(), status=0";
+									
+						if(mysqli_query($connection, $query) or die("Error:".mysqli_error($connection)))
+						{
+							//success response					
+							$response = array(
+								'status' => "success",
+								$data['user_type'] => $lastinsertid,
+								'status_message' => $data['user_type']." Registration successfull."
+							);	
+						}
+					}				
+				}
+				
+				//failure response
+				else
+				{
+					$response = array(
+						'status' => "failure",
+						'status_message' => $data['user_type']." Registration Failed."
+					);
 				}				
 			}
-			
-			//failure response
 			else
 			{
 				$response = array(
 					'status' => "failure",
-					'status_message' => $data['user_type']." Registration Failed."
+					'status_message' => "Username already exists."
 				);
-			}				
+			}	
 		}
 		else
 		{
 			$response = array(
 				'status' => "failure",
-				'status_message' => "Username already exists."
+				'status_message' =>"Missing any Fileds first_name, last_name, username, password, phone or address and user_type(parent or sitter)"
 			);
-		}	
+		}
+	} catch(Exception $e){
+		echo 'Exception: ' .$e->getMessage();
 	}
-	else
-	{
-		$response = array(
-			'status' => "failure",
-			'status_message' =>"Missing any Fileds first_name, last_name, username, password, phone or address and user_type(parent or sitter)"
-		);
-	}	
+	
 		
 	header('Content-Type: application/json');
 	echo json_encode($response);	
